@@ -28,13 +28,13 @@ robottype = get_type()
 row, col = 0, 0
 
 def overlord():
-    global team, opp_team, robottype
+    global team, opp_team, robottype, forward, row, col, pawn_state
 
     if team == Team.WHITE:
         index = 0
     else:
         index = board_size - 1
-
+    goal = board_size - 1 - index
     cont = True
 
     for c in range(board_size):
@@ -56,9 +56,15 @@ def overlord():
 
     dlog('Finish reaction strat')
 
+    availcols = {i for i in range(board_size)}
+    woncols = {i for i in range(board_size) if check_space(goal, i) == team}
+    dlog("WON: "+str(woncols))
+    rando = availcols - woncols
+    dlog("RAND: "+str(rando))
     if cont:
         for _ in range(board_size):
-            i = random.randint(0, board_size - 1)
+            i = random.sample(rando, 1)[0]
+            rando = rando.remove(i)
             if not check_space(index, i):
                 spawn(index, i)
                 dlog('Spawned unit at: (' + str(index) + ', ' + str(i) + ')')
@@ -149,9 +155,16 @@ def halt():
     dlog("HALT")
     if attempt_capture():
         return
-    elif flank_secured():
+    if check_halt():
+        if flank_secured():
+            pawn_state = "ADVANCE"
+            attempt_forward()
+        else:
+            return
+    else:
         pawn_state = "ADVANCE"
         attempt_forward()
+        return
 
 def pawn():
     global team, opp_team, robottype, forward, row, col, pawn_state
