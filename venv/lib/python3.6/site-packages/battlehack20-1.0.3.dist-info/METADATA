@@ -1,0 +1,18 @@
+Metadata-Version: 2.1
+Name: battlehack20
+Version: 1.0.3
+Summary: Battlehack 2020 game engine.
+Home-page: https://bh2020.battlecode.org
+Author: Battlecode
+Author-email: battlecode@mit.edu
+License: GNU General Public License v3.0
+Project-URL: Code, https://github.com/battlecode/battlehack20/tree/master/engine
+Project-URL: Documentation, https://github.com/battlecode/battlehack20/tree/master/engine
+Platform: UNKNOWN
+Requires-Python: >=3, <3.8
+Requires-Dist: RestrictedPython (==4.0b4)
+
+
+Read more at the Battlehack website: https://bh2020.battlecode.org.
+
+

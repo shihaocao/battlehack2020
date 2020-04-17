@@ -1,6 +1,5 @@
 import random
 
-
 # This is an example bot written by the developers!
 # Use this to help write your own code, or run it against your bot to see how well you can do!
 
@@ -26,6 +25,7 @@ team = get_team()
 opp_team = Team.WHITE if team == Team.BLACK else team.BLACK
 
 robottype = get_type()
+row, col = 0, 0
 
 def overlord():
     global team, opp_team, robottype
@@ -52,6 +52,7 @@ def overlord():
                 spawn(index, c)
                 cont = False
                 dlog('Reaction spawn at: (' + str(index) + ', ' + str(c) + ')')
+                return
 
     dlog('Finish reaction strat')
 
@@ -61,38 +62,82 @@ def overlord():
             if not check_space(index, i):
                 spawn(index, i)
                 dlog('Spawned unit at: (' + str(index) + ', ' + str(i) + ')')
-                break
+                return
 
-def pawn():
-    global team, opp_team, robottype
-    row, col = get_location()
-    dlog('My location is: ' + str(row) + ' ' + str(col))
+forward = 0
+if team == Team.WHITE:
+    forward = 1
+else:
+    forward = -1
 
-    if team == Team.WHITE:
-        forward = 1
-    else:
-        forward = -1
+pawn_state = "STAGE"
 
+def attempt_capture():
     # try catpuring pieces
     if check_space_wrapper(row + forward, col + 1, board_size) == opp_team: # up and right
         capture(row + forward, col + 1)
         dlog('Captured at: (' + str(row + forward) + ', ' + str(col + 1) + ')')
+        return True
 
     elif check_space_wrapper(row + forward, col - 1, board_size) == opp_team: # up and left
         capture(row + forward, col - 1)
         dlog('Captured at: (' + str(row + forward) + ', ' + str(col - 1) + ')')
+        return True
+    
+    return False
 
-    # halt if enemy knights move ahead
-    elif check_space_wrapper(row + forward*2, col + 1, board_size) == opp_team: # up and right
-        dlog("$ HALT")
-    elif check_space_wrapper(row + forward*2, col - 1, board_size) == opp_team: # up and right
-        dlog("$ HALT")
-
+def attempt_forward():
     # otherwise try to move forward
-    elif row + forward != -1 and row + forward != board_size and not check_space_wrapper(row + forward, col, board_size):
+    if row + forward != -1 and row + forward != board_size and not check_space_wrapper(row + forward, col, board_size):
         #               ^  not off the board    ^            and    ^ directly forward is empty
         move_forward()
         dlog('Moved forward!')
+        return True
+    
+    return False
+
+def check_halt():
+    # halt if enemy knights move ahead
+    if check_space_wrapper(row + forward*2, col + 1, board_size) == opp_team: # up and right
+        dlog("$ RECCOMEND HALTED")
+    elif check_space_wrapper(row + forward*2, col - 1, board_size) == opp_team: # up and right
+        dlog("$ RECCOMEND HALTED")
+
+def stage():
+    dlog("STAGE")
+    if attempt_capture():
+        return
+    elif attempt_forward():
+        return
+        
+def advance():
+    dlog("ADVANCE")
+    attempt_capture()
+
+    if check_halt():
+        pawn_state = "HALT"
+    else:
+        attempt_forward()
+
+def halt():
+    dlog("HALT")
+    attempt_capture()
+
+def pawn():
+    global team, opp_team, robottype, forward
+    global row, col
+    row, col = get_location()
+    dlog('My location is: ' + str(row) + ' ' + str(col))
+
+    pawn_switcher = {
+        "STAGE": stage,
+        "ADVANCE": advance,
+        "HALT": halt
+    }
+
+    func = pawn_switcher.get(pawn_state)
+    func()
+
 def turn():
     """
     MUST be defined for robot to run

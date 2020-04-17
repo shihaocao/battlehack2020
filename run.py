@@ -6,6 +6,8 @@ import threading
 
 from battlehack20 import CodeContainer, Game, BasicViewer, GameConstants
 
+# new line
+# from fancyviewer import FancyViewer
 """
 This is a simple script for running bots and debugging them.
 
@@ -104,6 +106,7 @@ if __name__ == '__main__':
     
     # ... and the viewer.
     viewer = BasicViewer(args.board_size, game.board_states, colors=not args.raw_text)
+    # viewer = FancyViewer(args.board_size, game.board_states)
 
 
     # Here we check if the script is run using the -i flag.
