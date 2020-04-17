@@ -70,9 +70,11 @@ if team == Team.WHITE:
 else:
     forward = -1
 
-pawn_state = "STAGE"
+pawn_state = "ADVANCE"
 
 def attempt_capture():
+    global team, opp_team, robottype, forward, row, col, pawn_state
+
     # try catpuring pieces
     if check_space_wrapper(row + forward, col + 1, board_size) == opp_team: # up and right
         capture(row + forward, col + 1)
@@ -87,6 +89,8 @@ def attempt_capture():
     return False
 
 def attempt_forward():
+    global team, opp_team, robottype, forward, row, col, pawn_state
+
     # otherwise try to move forward
     if row + forward != -1 and row + forward != board_size and not check_space_wrapper(row + forward, col, board_size):
         #               ^  not off the board    ^            and    ^ directly forward is empty
@@ -97,13 +101,20 @@ def attempt_forward():
     return False
 
 def check_halt():
+    global team, opp_team, robottype, forward, row, col, pawn_state
+
     # halt if enemy knights move ahead
     if check_space_wrapper(row + forward*2, col + 1, board_size) == opp_team: # up and right
         dlog("$ RECCOMEND HALTED")
+        return True
     elif check_space_wrapper(row + forward*2, col - 1, board_size) == opp_team: # up and right
         dlog("$ RECCOMEND HALTED")
+        return True
+    return False
 
 def stage():
+    global team, opp_team, robottype, forward, row, col, pawn_state
+
     dlog("STAGE")
     if attempt_capture():
         return
@@ -111,21 +122,39 @@ def stage():
         return
         
 def advance():
+    global team, opp_team, robottype, forward, row, col, pawn_state
     dlog("ADVANCE")
-    attempt_capture()
-
-    if check_halt():
+    if attempt_capture():
+        return
+    elif check_halt():
+        dlog("My state: "+pawn_state)
         pawn_state = "HALT"
+        return
     else:
         attempt_forward()
+        return
+
+def flank_secured():
+    global team, opp_team, robottype, forward, row, col, pawn_state
+    if check_space_wrapper(row, col + 1, board_size) == team: # up and right
+        return True
+    elif check_space_wrapper(row, col - 1, board_size) == team:
+        return True
+    return False
+
 
 def halt():
+    global team, opp_team, robottype, forward, row, col, pawn_state
+    
     dlog("HALT")
-    attempt_capture()
+    if attempt_capture():
+        return
+    elif flank_secured():
+        pawn_state = "ADVANCE"
+        attempt_forward()
 
 def pawn():
-    global team, opp_team, robottype, forward
-    global row, col
+    global team, opp_team, robottype, forward, row, col, pawn_state
     row, col = get_location()
     dlog('My location is: ' + str(row) + ' ' + str(col))
 
@@ -143,7 +172,7 @@ def turn():
     MUST be defined for robot to run
     This function will be called at the beginning of every turn and should contain the bulk of your robot commands
     """
-    global team, opp_team, robottype
+    global team, opp_team, robottype, forward, row, col, pawn_state
 
     if robottype == RobotType.PAWN:
         pawn()
