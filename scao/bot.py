@@ -1,5 +1,5 @@
 import random
-
+# from battlehack2020.stubs import *
 # This is an example bot written by the developers!
 # Use this to help write your own code, or run it against your bot to see how well you can do!
 
@@ -62,9 +62,10 @@ def overlord():
     rando = availcols - woncols
     dlog("RAND: "+str(rando))
     if cont:
+        i = -1
         for _ in range(board_size):
             i = random.sample(rando, 1)[0]
-            rando = rando.remove(i)
+            rando = rando - {i}
             if not check_space(index, i):
                 spawn(index, i)
                 dlog('Spawned unit at: (' + str(index) + ', ' + str(i) + ')')
@@ -195,5 +196,5 @@ def turn():
         overlord()
 
     bytecode = get_bytecode()
-    dlog('Done! Bytecode left: ' + str(bytecode))
+    # dlog('Done! Bytecode left: ' + str(bytecode))
 
